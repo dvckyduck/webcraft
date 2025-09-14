@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voxel Renderer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="mainMenu" role="dialog" aria-modal="true" aria-label="Main menu">
+      <div class="menu-card">
+        <div class="menu-inner">
+          <div class="logo-col">
+            <img src="/ca0c8e98e4b7641df044a0e150945dbf4aeea1ecda39a3ee5e6b4b0d3255bfef95601890afd80709da39a3ee5e6b4b0d3255bfef95601890afd8070905ccb9558d135c6627fbe265fa4dab9d.png" alt="HEACRAFT logo" class="menu-logo logo-large">
+          </div>
+          <div class="buttons-col" role="menu" aria-label="Main menu actions">
+            <button id="singleBtn" class="btn mc-button" aria-label="Singleplayer">Singleplayer</button>
+            <button id="multiBtn" class="btn mc-button" aria-label="Multiplayer">Multiplayer</button>
+            <button id="optionsBtnMenu" class="btn mc-button" aria-label="Options">Options</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- World opener modal -->
+    <div id="worldOpener" class="modal" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-label="Open or create world">
+        <h2>Worlds</h2>
+        <div id="worldList" class="world-list" role="list"></div>
+        <div class="world-actions">
+          <button id="openCreateWorldBtn" class="btn">Create World</button>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelWorldBtn" class="btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create world modal (separate) -->
+    <div id="createWorldModal" class="modal" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-label="Create world">
+        <h2>Create World</h2>
+        <div class="world-actions" style="margin-bottom:12px;">
+          <input id="newWorldName" placeholder="New world name" aria-label="New world name">
+        </div>
+        <div class="world-actions" style="margin-bottom:12px;">
+          <label for="newWorldType">World Type:</label>
+          <select id="newWorldType" aria-label="World Type">
+            <option value="normal">Normal</option>
+            <option value="flat">Flat</option>
+          </select>
+        </div>
+        <div class="world-actions" style="margin-bottom:12px;">
+          <label for="newWorldGamemode">Game Mode:</label>
+          <select id="newWorldGamemode" aria-label="Game Mode">
+            <option value="survival">Survival</option>
+            <option value="creative">Creative</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button id="createWorldBtn" class="btn">Create</button>
+          <button id="cancelCreateWorldBtn" class="btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="ui">
+        <div class="controls">
+            <div class="control-group">
+                <label>Render Distance: <span id="renderDistanceValueHud">256</span></label>
+                <input type="range" id="renderDistance" min="32" max="8192" value="256" step="16">
+            </div>
+            <div class="control-group">
+                <label>FOV: <span id="fovValueHud">75</span></label>
+                <input type="range" id="fov" min="45" max="120" value="75">
+            </div>
+            <div class="coords-readout control-group">
+                <label>Position:</label>
+                <div class="coords-line">
+                    X: <span id="posX">0</span>
+                    Y: <span id="posY">0</span>
+                    Z: <span id="posZ">0</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>Edit Coordinates to Teleport</label>
+                <div class="coord-inputs">
+                    <input type="number" id="inputX" step="1" aria-label="X coordinate">
+                    <input type="number" id="inputY" step="1" aria-label="Y coordinate">
+                    <input type="number" id="inputZ" step="1" aria-label="Z coordinate">
+                    <button id="teleportBtn" class="btn">Teleport</button>
+                </div>
+                <small class="hint">Tip: Press Enter in any box to teleport.</small>
+            </div>
+        </div>
+    </div>
+    <div id="hud" aria-live="polite">
+        <div class="line">FPS: <span id="fps">0</span></div>
+        <div class="line">X: <span id="hudPosX">0</span> Y: <span id="hudPosY">0</span> Z: <span id="hudPosZ">0</span></div>
+    </div>
+    <button id="uiToggle" aria-label="Toggle controls">☰</button>
+    <!-- Pause overlay (shown in-game via ESC) -->
+    <div id="pauseOverlay" aria-hidden="true">
+        <div class="pause-card">
+            <h2>Paused</h2>
+            <div class="pause-actions">
+                <button id="resumeBtn" class="btn">Resume</button>
+                <button id="pauseOptionsBtn" class="btn">Options</button>
+                <button id="returnMainMenuBtn" class="btn">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="optionsOverlay" aria-hidden="true">
+        <div class="options-content">
+            <h2>Options</h2>
+            <div class="control-group">
+                <label>Render Distance: <span id="renderDistanceValueOverlay">256</span></label>
+                <input type="range" id="renderDistanceOverlay" min="32" max="8192" value="256" step="16">
+            </div>
+            <div class="control-group">
+                <label>FOV: <span id="fovValueOverlay">75</span></label>
+                <input type="range" id="fovOverlay" min="45" max="120" value="75">
+            </div>
+            <div class="control-group">
+                <label>LOD distance scaling: <span id="lodScaleValueOverlay">1.0</span></label>
+                <input type="range" id="lodScaleOverlay" min="0.1" max="10" value="1" step="0.1">
+            </div>
+            <div class="control-group">
+                <label>Edit Coordinates to Teleport</label>
+                <div class="coord-inputs">
+                    <input type="number" id="inputX" step="1" aria-label="X coordinate">
+                    <input type="number" id="inputY" step="1" aria-label="Y coordinate">
+                    <input type="number" id="inputZ" step="1" aria-label="Z coordinate">
+                    <button id="teleportBtn" class="btn">Teleport</button>
+                </div>
+                <small class="hint">Tip: Press Enter in any box to teleport.</small>
+            </div>
+            <div class="control-group" style="margin-top:8px;">
+                <button id="openBlocksBtn" class="btn">Blocks</button>
+            </div>
+            <button id="closeOptions" class="btn close-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- Blocks browser modal -->
+    <div id="blocksOverlay" class="modal" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-label="Blocks">
+        <h2>Blocks</h2>
+        <div id="blocksGrid" class="world-list" role="list" style="display:grid;grid-template-columns:repeat(auto-fit,64px);gap:8px;max-height:60vh;overflow:auto;padding:8px;"></div>
+        <div class="modal-footer">
+          <button id="closeBlocksBtn" class="btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hotbar -->
+    <div id="hotbar" aria-label="Hotbar"></div>
+    <!-- Inventory Overlay -->
+    <div id="inventoryOverlay" aria-hidden="true">
+      <div class="inventory-content">
+        <h2>Inventory</h2>
+        <div id="inventoryGrid" class="grid"></div>
+        <button id="closeInventory" class="btn close-btn">Close</button>
+      </div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div id="crosshair" aria-hidden="true"></div>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://esm.sh/three@0.158.0",
+            "nipplejs": "https://esm.sh/nipplejs@0.10.1"
+        }
+    }
+    </script>
+    <script src="voxel-engine.js" type="module"></script>
+    <script src="main.js" type="module"></script>
+</body>
+</html>
